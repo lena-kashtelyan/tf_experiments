@@ -7,6 +7,11 @@ import skimage
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+def import_model(mtype,attention=False):
+    if attention:
+        mtype = 'att_' + mtype
+    from model_depo import mtype as nn_model
+
 def preproc_im(im):
     im[:,:,0] -= 103.939
     im[:,:,1] -= 116.779

@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from helper_functions import *
+from exp_ops.helper_functions import *
 import sys
 sys.path.append('/home/drew/Documents/tensorflow-vgg/')
 from model_depo import att_vgg16 as vgg16
@@ -9,14 +9,13 @@ from tqdm import tqdm
 from copy import deepcopy
 
 #settings
-#test_im_dir = '/home/drew/Documents/MIRC_behavior/all_images'
+absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
-syn_file = '/home/drew/caffe/data/ilsvrc12/synsets.txt'
-full_syn = '../synset.txt'
+syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
+full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
+weight_path = absolute_home + '/pretrained_weights/vgg16.npy'
 attention_path = '/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'
-#attention_path = '/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/linear_accumulation_human/heatmaps.npz'
-weight_path = '../pretrained_weights/vgg16.npy'
 im_ext = '.JPEG'
 im_size = [224,224]
 grayscale=False

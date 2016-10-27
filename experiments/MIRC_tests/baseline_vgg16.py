@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from helper_functions import *
+from exp_ops.helper_functions import *
 import sys
 sys.path.append('/home/drew/Documents/tensorflow-vgg/')
 from model_depo import vgg16
