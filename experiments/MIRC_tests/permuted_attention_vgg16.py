@@ -3,8 +3,8 @@ import tensorflow as tf
 from helper_functions import *
 import sys
 sys.path.append('/home/drew/Documents/tensorflow-vgg/')
-import vgg16
-from utils import print_prob
+from model_depo import att_vgg16 as vgg16
+from ops.utils import print_prob
 from tqdm import tqdm
 from copy import deepcopy
 

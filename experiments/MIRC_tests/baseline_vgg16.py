@@ -3,16 +3,16 @@ import tensorflow as tf
 from helper_functions import *
 import sys
 sys.path.append('/home/drew/Documents/tensorflow-vgg/')
-import vgg16
-from utils import print_prob
+from model_depo import vgg16
+from ops.utils import print_prob
 
 #settings
-#test_im_dir = '/home/drew/Documents/MIRC_behavior/all_images'
+absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
-syn_file = '/home/drew/caffe/data/ilsvrc12/synsets.txt'
-full_syn = '../synset.txt'
-weight_path = '../pretrained_weights/vgg16.npy'
+syn_file = absolute_home + '/ilsvrc_2012/synset_names.txt'
+full_syn = absolute_home + '/ilsvrc_2012/synset.txt'
+weight_path = absolute_home + 'pretrained_weights/vgg16.npy'
 im_ext = '.JPEG'
 im_size = [224,224]
 grayscale=False
