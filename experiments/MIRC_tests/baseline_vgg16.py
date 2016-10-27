@@ -10,9 +10,9 @@ from ops.utils import print_prob
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
-syn_file = absolute_home + '/ilsvrc_2012/synset_names.txt'
-full_syn = absolute_home + '/ilsvrc_2012/synset.txt'
-weight_path = absolute_home + 'pretrained_weights/vgg16.npy'
+syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
+full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
+weight_path = absolute_home + '/pretrained_weights/vgg16.npy'
 im_ext = '.JPEG'
 im_size = [224,224]
 grayscale=False
