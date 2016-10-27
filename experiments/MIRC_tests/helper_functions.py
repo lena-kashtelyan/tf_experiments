@@ -246,8 +246,19 @@ def load_image(path):
     resized_img = skimage.transform.resize(crop_img, (224, 224))
     return resized_img
 
-def shuffle_attention(attention_batch):
+def shuffle_attention(attention_batch,shuffle_or_warp):
     for idx in range(attention_batch.shape[0]):
-        it_map = np.squeeze(attention_batch[idx,:,:,:])[np.random.permutation(attention_batch.shape[1]),:]
-        attention_batch[idx,:,:,:] = it_map[:,np.random.permutation(attention_batch.shape[1])][:,:,None] #alternatively, use image warping/rotation to produce "synthetic" attention maps
+        if shuffle_or_warp == 'scramble':
+            it_map = np.squeeze(attention_batch[idx,:,:,:])[np.random.permutation(attention_batch.shape[1]),:]
+            attention_batch[idx,:,:,:] = it_map[:,np.random.permutation(attention_batch.shape[1])][:,:,None] 
+        if shuffle_or_warp == 'shuffle':
+            attention_batch = attention_batch[np.random.permutation(attention_batch.shape[0])]
+        elif shuffle_or_warp == 'warp':
+            #tform = skimage.transform.AffineTransform(scale=np.random.uniform(.9,1.1), \
+            #    rotation=np.random.uniform(-np.pi/8,np.pi/8),\
+            #    translation=(np.random.randint(np.round(-attention_batch.shape[1]*.05),np.round(attention_batch.shape[1]*.5))))
+            tform = skimage.transform.AffineTransform(scale=np.repeat(np.random.uniform(.75,1.25),2),\
+                translation=(np.random.randint(-np.round(attention_batch.shape[1]*.25),np.round(attention_batch.shape[1]*.25)),\
+                np.random.randint(-np.round(attention_batch.shape[1]*.25),np.round(attention_batch.shape[1]*.25))))
+            attention_batch[idx,:,:,:] = (skimage.transform.warp(np.squeeze(attention_batch[idx,:,:,:]-1),tform)+1)[:,:,None] #HARDCODED FOR THE [1,2] ATTENTION CASE
     return attention_batch

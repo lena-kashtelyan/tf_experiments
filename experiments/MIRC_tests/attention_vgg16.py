@@ -3,22 +3,21 @@ import tensorflow as tf
 from helper_functions import *
 import sys
 sys.path.append('/home/drew/Documents/tensorflow-vgg/')
-import vgg16
+import att_vgg16 as vgg16
 from utils import print_prob
 
 #settings
-#test_im_dir = '/home/drew/Documents/MIRC_behavior/all_images'
+absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
-syn_file = '/home/drew/caffe/data/ilsvrc12/synsets.txt'
-full_syn = '../synset.txt'
+syn_file = absolute_home + '/' + ilsvrc_2012 + '/synset_names.txt'
+full_syn = absolute_home + '/' + ilsvrc_2012 + '/synset.txt'
 attention_path = '/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'
-#attention_path = '/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/linear_accumulation_human/heatmaps.npz'
-weight_path = '../pretrained_weights/vgg16.npy'
+weight_path = absolute_home + 'pretrained_weights/vgg16.npy'
 im_ext = '.JPEG'
 im_size = [224,224]
 grayscale=False
-divisive_normalization = False
+attention_conv = '2_2'
 
 #Load model and relevant info
 syn, skeys = get_synkeys()
@@ -35,7 +34,7 @@ with tf.device('/gpu:0'):
         images = tf.placeholder("float", test_X.shape)    
         attention_maps = tf.placeholder("float", attention_batch.shape)   
         with tf.name_scope("content_vgg"):
-            vgg.build(images,attention_maps,divisive_normalization)
+            vgg.build(images,attention_maps,attention_conv)
 
         feed_dict = {images: test_X, attention_maps: attention_batch}
 

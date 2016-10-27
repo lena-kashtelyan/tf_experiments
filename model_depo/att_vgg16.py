@@ -20,7 +20,7 @@ class Vgg16:
         self.data_dict = np.load(vgg16_npy_path, encoding='latin1').item()
         print("npy file loaded")
 
-    def build(self, rgb, attention_maps=None, divisive_normalization=None):
+    def build(self, rgb, attention_maps=None, attention_conv='1_1'):
         """
         load variable from npy to build the VGG
 
@@ -43,17 +43,26 @@ class Vgg16:
         ])
         assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
 
-        self.conv1_1 = self.conv_layer(bgr, "conv1_1")
-        #### Import attention maps, resized to the size of conv1_1 output
-        if attention_maps != None:
-            #self.attention = self.attention_fun(attention_maps,self.conv1_1)
-            self.conv1_2 = self.attention_conv_layer(self.conv1_1, attention_maps, divisive_normalization, "conv1_2")
+        if attention_maps != None and attention_conv == '1_1':
+            self.conv1_1 = self.attention_conv_layer(bgr, attention_maps, "conv1_1")
+        else:
+            self.conv1_1 = self.conv_layer(bgr, "conv1_1")
+        if attention_maps != None and attention_conv == '1_2':
+            self.conv1_2 = self.attention_conv_layer(self.conv1_1, attention_maps, "conv1_2")
         else:
             self.conv1_2 = self.conv_layer(self.conv1_1, "conv1_2")
         self.pool1 = self.max_pool(self.conv1_2, 'pool1')
 
-        self.conv2_1 = self.conv_layer(self.pool1, "conv2_1")
-        self.conv2_2 = self.conv_layer(self.conv2_1, "conv2_2")
+        if attention_maps != None and attention_conv == '2_1':
+            #self.attention = self.attention_fun(attention_maps,self.conv1_1)
+            self.conv2_1 = self.attention_conv_layer(self.pool1, attention_maps, "conv2_1")
+        else:
+            self.conv2_1 = self.conv_layer(self.pool1, "conv2_1")
+        if attention_maps != None and attention_conv == '2_1':
+            #self.attention = self.attention_fun(attention_maps,self.conv1_1)
+            self.conv2_2 = self.attention_conv_layer(self.conv2_1, attention_maps, "conv2_2")
+        else:
+            self.conv2_2 = self.conv_layer(self.conv2_1, "conv2_2")
         self.pool2 = self.max_pool(self.conv2_2, 'pool2')
 
         self.conv3_1 = self.conv_layer(self.pool2, "conv3_1")
@@ -108,13 +117,19 @@ class Vgg16:
             relu = tf.nn.relu(bias)
             return relu
 
-    def attention_conv_layer(self, bottom, at_maps, divisive_normalization, name):
+    def attention_conv_layer(self, bottom, at_maps, name):
         with tf.variable_scope(name):
             filt = self.get_conv_filter(name)
             conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
+
+            at_shape = at_maps.get_shape()
+            conv_shape = conv.get_shape()
+            if at_shape[1] != conv_shape[1]:
+                at_maps = tf.image.resize_images(at_maps,conv_shape[1],conv_shape[2])
+
             supp_drive = tf.mul(at_maps,conv) #multiplicative attention
-            if divisive_normalization:
-                supp_drive = tf.div(conv,supp_drive)
+            #if divisive_normalization:
+            #    supp_drive = tf.div(conv,supp_drive)
             conv_biases = self.get_bias(name)
             bias = tf.nn.bias_add(supp_drive, conv_biases)
 
