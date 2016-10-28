@@ -2,7 +2,8 @@ import numpy as np
 import tensorflow as tf
 from exp_ops.helper_functions import *
 import sys
-sys.path.append('/home/drew/Documents/tensorflow-vgg/')
+#sys.path.append('/home/drew/Documents/tensorflow-vgg/')
+sys.path.append('../../')
 from model_depo import vgg16
 from ops.utils import print_prob
 

@@ -1,18 +1,17 @@
+import datetime
+import numpy as np
+import os
+import time
 import skimage.io  # bug. need to import this before tensorflow
 import skimage.transform  # bug. need to import this before tensorflow
 import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.training import moving_averages
-
 import sys
 sys.path.append('../')
 #sys.path.append('/home/drew/Documents/tensorflow-vgg/')
 from ops.config import Config
 
-import datetime
-import numpy as np
-import os
-import time
 
 MOVING_AVERAGE_DECAY = 0.9997
 BN_DECAY = MOVING_AVERAGE_DECAY
@@ -159,17 +158,17 @@ def loss(logits, labels):
     return loss_
 
 
-def stack(x, c, att_layer=None):
+def stack(x, c):
     for n in range(c['num_blocks']):
         s = c['stack_stride'] if n == 0 else 1
         c['block_stride'] = s
         with tf.variable_scope('block%d' % (n + 1)):
             #implement attention here
-            x = block(x, c, att_layer)
+            x = block(x, c)
     return x
 
 
-def block(x, c, att_layer):
+def block(x, c):
     filters_in = x.get_shape()[-1]
 
     # Note: filters_out isn't how many filters are outputed. 
@@ -180,7 +179,6 @@ def block(x, c, att_layer):
     filters_out = m * c['block_filters_internal']
 
     shortcut = x  # branch 1
-    import ipdb;ipdb.set_trace()
 
     c['conv_filters_out'] = c['block_filters_internal']
 

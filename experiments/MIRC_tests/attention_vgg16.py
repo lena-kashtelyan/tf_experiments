@@ -13,7 +13,11 @@ train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
 weight_path = absolute_home + '/pretrained_weights/vgg16.npy'
-attention_path = '/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'
+#attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz']
+attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+#attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
+#'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+
 im_ext = '.JPEG'
 im_size = [224,224]
 grayscale=False
@@ -39,11 +43,10 @@ with tf.device('/gpu:0'):
         feed_dict = {images: test_X, attention_maps: attention_batch}
 
         prob = sess.run(vgg.prob, feed_dict=feed_dict)
-        #l1 = sess.run(vgg.conv1_1, feed_dict=feed_dict)
+        l1 = sess.run(vgg.conv1_1, feed_dict=feed_dict)
         #l2 = sess.run(vgg.conv2_1, feed_dict=feed_dict)
 
 class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
 
 #im_mosaic(np.squeeze(l1[0,:,:,:]))  
-#im_mosaic(np.squeeze(att[0,:,:,:]))  
 #im_mosaic(np.squeeze(l2[0,:,:,:]))  
