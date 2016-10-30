@@ -13,11 +13,18 @@ def import_model(mtype,attention=False):
     from model_depo import mtype as nn_model
 
 def preproc_im(im):
+    if np.max(im) <= 1:
+        im *= 255.0
     im[:,:,0] -= 103.939
     im[:,:,1] -= 116.779
     im[:,:,2] -= 123.68
     im = im[...,[2,1,0]] #RGB -> BGR
+    if len(im.shape) == 4:
+        out_4d = True
+        im = np.squeeze(im)
     im = im.transpose((2,0,1)) # H/W/C -> C/H/W
+    if out_4d:
+        im = im[None,:,:,:]
     return im
 
 def find_syn(syn,cat,skeys):
@@ -48,7 +55,7 @@ def read_color(im):
 def read_gray(im):
     return np.repeat(skimage.color.rgb2gray(load_image(im))[:,:,None],3,axis=2)[None,:,:,:]
 
-def process_image(im,im_size,togray=True): #TODO, remove im_size from this. 224x224 is hardcoded
+def process_image(im,im_size,togray=True,apply_preprocess=False): #TODO, remove im_size from this. 224x224 is hardcoded
     if togray:
         proc_im = read_gray(im)
     else:
@@ -57,6 +64,8 @@ def process_image(im,im_size,togray=True): #TODO, remove im_size from this. 224x
         except:
             print('Image read as grayscale:',im)
             proc_im = read_gray(im)
+    if apply_preprocess:
+        proc_im = preproc_im(proc_im)
     return proc_im
 
 def get_synkeys():
@@ -102,7 +111,7 @@ def check_mean_att(att_maps):
 def get_attention_maps(attention_path,im_size):
     att_data = [extract_attention_from_npz(x) for x in attention_path]
     att_labels = att_data[0][1]
-    
+
     if len(attention_path) == 1:
         att_maps = att_data[0][0]
     else:
@@ -144,7 +153,7 @@ def prepare_training_images(train_im_dir, im_size, im_ext, grayscale=False, keep
         y_names = np.append(y_names,np.repeat(idx,img_pointers.shape[0]))
     return im_array,y,y_names
 
-def prepare_testing_images(test_im_dir, im_size, im_ext, grayscale=False, keep_number = 500):
+def prepare_testing_images(test_im_dir, im_size, im_ext, grayscale=False, apply_preprocess=False,eep_number = 500):
     #train_im_dir is a directory of directories
     X = []
     y = []
@@ -152,7 +161,7 @@ def prepare_testing_images(test_im_dir, im_size, im_ext, grayscale=False, keep_n
     test_ims = sorted(glob(test_im_dir + '/*' + im_ext))
 
     for il, im in enumerate(test_ims):
-        it_im = process_image(im,im_size,grayscale)
+        it_im = process_image(im,im_size,grayscale,apply_preprocess)
         if il == 0:
             im_array = it_im
         else:

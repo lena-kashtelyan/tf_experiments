@@ -35,7 +35,8 @@ def inference(x, is_training,
               num_classes=1000,
               num_blocks=[3, 4, 6, 3],  # defaults to 50-layer network
               use_bias=False, # defaults to using batch norm
-              bottleneck=True):
+              bottleneck=True,
+              attention_maps=None):
     c = Config()
     c['bottleneck'] = bottleneck
     c['is_training'] = tf.convert_to_tensor(is_training,
@@ -53,6 +54,12 @@ def inference(x, is_training,
         c['ksize'] = 7
         c['stride'] = 2
         x = conv(x, c)
+        if attention_maps != None:
+            at_shape = attention_maps.get_shape()
+            conv_shape = x.get_shape()
+            if at_shape[1] != conv_shape[1]:
+                attention_maps = tf.image.resize_images(attention_maps,conv_shape[1],conv_shape[2])
+            x = tf.mul(attention_maps,x) #multiplicative attention
         x = bn(x, c)
         x = activation(x)
 
@@ -164,7 +171,6 @@ def stack(x, c, att_layer=None):
         s = c['stack_stride'] if n == 0 else 1
         c['block_stride'] = s
         with tf.variable_scope('block%d' % (n + 1)):
-            #implement attention here
             x = block(x, c, att_layer)
     return x
 
@@ -180,7 +186,6 @@ def block(x, c, att_layer):
     filters_out = m * c['block_filters_internal']
 
     shortcut = x  # branch 1
-    import ipdb;ipdb.set_trace()
 
     c['conv_filters_out'] = c['block_filters_internal']
 
@@ -329,30 +334,6 @@ def conv(x, c):
                             initializer=initializer,
                             weight_decay=CONV_WEIGHT_DECAY)
     return tf.nn.conv2d(x, weights, [1, stride, stride, 1], padding='SAME')
-
-def attention_conv(x, c, att_maps):
-    ksize = c['ksize']
-    stride = c['stride']
-    filters_out = c['conv_filters_out']
-
-    filters_in = x.get_shape()[-1]
-    shape = [ksize, ksize, filters_in, filters_out]
-    initializer = tf.truncated_normal_initializer(stddev=CONV_WEIGHT_STDDEV)
-    weights = _get_variable('weights',
-                            shape=shape,
-                            dtype='float',
-                            initializer=initializer,
-                            weight_decay=CONV_WEIGHT_DECAY)
-    conv = tf.nn.conv2d(x, weights, [1, stride, stride, 1], padding='SAME')
-    at_shape = at_maps.get_shape()
-    conv_shape = conv.get_shape()
-    if at_shape[1] != conv_shape[1]:
-        at_maps = tf.image.resize_images(at_maps,conv_shape[1],conv_shape[2])
-
-    return tf.mul(at_maps,conv) #multiplicative attention
-
-     
-
 
 def _max_pool(x, ksize=3, stride=2):
     return tf.nn.max_pool(x,

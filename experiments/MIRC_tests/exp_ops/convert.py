@@ -317,7 +317,7 @@ def save_graph(save_path):
 
     print "saved model to %s" % save_path
 
-def create_att_net(weight_path, layers):
+def create_att_net(weight_path, layers, attention_maps=None):
 
     if layers == 50:
         num_blocks = [3, 4, 6, 3]
@@ -326,25 +326,26 @@ def create_att_net(weight_path, layers):
     elif layers == 152:
         num_blocks = [3, 8, 36, 3]
 
-    with tf.device('/gpu:0'):
-        images = tf.placeholder("float32", [None, 224, 224, 3], name="images")
-        logits = resnet.inference(images,
-                                  is_training=False,
-                                  num_blocks=num_blocks,
-                                  bottleneck=True)
-        prob = tf.nn.softmax(logits, name='prob')
-
+    #with tf.device('/gpu:0'):
+    images = tf.placeholder("float32", [None, 224, 224, 3], name="images")
+    logits = resnet.inference(images,
+                              is_training=True,#False,
+                              num_blocks=num_blocks,
+                              bottleneck=True,
+                              attention_maps=attention_maps)
+    prob = tf.nn.softmax(logits, name='prob')
     
     # We write the metagraph first to avoid adding a bunch of
     # assign ops that are used to set variables from caffe.
     # The checkpoint is written to at the end.
-    tf.train.export_meta_graph(filename=meta_fn(layers))
+    #tf.train.export_meta_graph(filename=meta_fn(layers))
 
-    vars_to_restore = tf.all_variables()
-    saver = tf.train.Saver(vars_to_restore)
+    #vars_to_restore = tf.all_variables()
+    #saver = tf.train.Saver(vars_to_restore)
 
-    sess = tf.Session()
-    sess.run(tf.initialize_all_variables())
+    #sess = tf.Session()
+    #sess.run(tf.initialize_all_variables())
+    return logits, prob, images
 
 
 def main(_):

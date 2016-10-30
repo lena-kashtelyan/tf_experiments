@@ -14,9 +14,9 @@ syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
 weight_path = absolute_home + '/pretrained_weights/vgg16.npy'
 #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz']
-attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
-#attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
-#'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+#attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
+'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
 
 im_ext = '.JPEG'
 im_size = [224,224]
