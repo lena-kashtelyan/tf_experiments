@@ -3,7 +3,7 @@ import numpy as np
 from glob import glob
 from scipy import misc
 from sklearn import svm
-import skimage
+import skimage, skimage.color, skimage.io, skimage.transform
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
