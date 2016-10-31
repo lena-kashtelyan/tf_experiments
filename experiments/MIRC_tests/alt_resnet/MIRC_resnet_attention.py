@@ -15,8 +15,8 @@ from glob import glob
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
-#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_50_data.npy'
-model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_102_data.npy'
+model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_50_data.npy'
+#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_101_data.npy'
 #model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_152_data.npy'
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
@@ -27,6 +27,8 @@ batch_size = 25
 
 # Get the data specifications for the GoogleNet model
 spec = models.get_data_spec(model_class=models.ResNet50)
+#spec = models.get_data_spec(model_class=models.ResNet101)
+#spec = models.get_data_spec(model_class=models.ResNet152)
 
 #Images
 _,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
@@ -44,8 +46,8 @@ input_node = tf.placeholder(tf.float32,
 attention = tf.placeholder(tf.float32,shape=(None, spec.crop_size, spec.crop_size, 1))
 
 # Construct the network
-#net = models.attResNet50({'data': input_node, 'attention' : attention})
-net = models.attResNet101({'data': input_node, 'attention' : attention})
+net = models.attResNet50({'data': input_node, 'attention' : attention})
+#net = models.attResNet101({'data': input_node, 'attention' : attention})
 #net = models.attResNet152({'data': input_node, 'attention' : attention})
 
 # Create an image producer (loads and processes images in parallel)
