@@ -147,9 +147,9 @@ class Network(object):
 
     @layer
     def attention(self,input,name):
-        in_id = [bool(re.search(r'conv',x.name)) for x in input]
-	conv_location = [i for i, x in enumerate(in_id) if x]
-        att_location = [i for i, x in enumerate(in_id) if not x]
+        in_id = [bool(re.search(r'attention_maps',x.name)) for x in input]
+        att_location = [i for i, x in enumerate(in_id) if x]
+        conv_location = [i for i, x in enumerate(in_id) if not x]
         conv = input[conv_location[0]]
         att = input[att_location[0]]
         conv_shape = conv.get_shape()

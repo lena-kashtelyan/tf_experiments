@@ -15,13 +15,12 @@ from glob import glob
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
-model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_data.npy'
+model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_50_data.npy'
+#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_101_data.npy'
+#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_152_data.npy'
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
-attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
-'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
 im_ext = '.JPEG'
 im_size = [224,224]
-batch_size = 25
 
 # Get the data specifications for the GoogleNet model
 spec = models.get_data_spec(model_class=models.ResNet50)
@@ -67,5 +66,7 @@ with tf.Session() as sesh:
     coordinator.request_stop()
     coordinator.join(threads, stop_grace_period_secs=2)
 
+sorted_indices = np.argsort(indices)
+prob = prob[sorted_indices,:]
 class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
 

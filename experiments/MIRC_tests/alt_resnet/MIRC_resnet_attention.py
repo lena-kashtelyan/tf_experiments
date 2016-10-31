@@ -15,20 +15,24 @@ from glob import glob
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
-model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_50_data.npy'
-#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_101_data.npy'
-#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_152_data.npy'
-test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
-attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
-'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+
 im_ext = '.JPEG'
 im_size = [224,224]
 batch_size = 25
+resnet_type = 50
+
+model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
+test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
+attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
+'/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
 
 # Get the data specifications for the GoogleNet model
-spec = models.get_data_spec(model_class=models.ResNet50)
-#spec = models.get_data_spec(model_class=models.ResNet101)
-#spec = models.get_data_spec(model_class=models.ResNet152)
+if resnet_type == 50:
+    spec = models.get_data_spec(model_class=models.ResNet50)
+elif resnet_type == 101:
+    spec = models.get_data_spec(model_class=models.ResNet101)
+elif resnet_type == 152:
+    spec = models.get_data_spec(model_class=models.ResNet152)
 
 #Images
 _,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
@@ -43,12 +47,15 @@ attention_batch = get_attention_maps(attention_path,[spec.crop_size,spec.crop_si
 # Create a placeholder for the input image
 input_node = tf.placeholder(tf.float32,
                                 shape=(None, spec.crop_size, spec.crop_size, spec.channels))
-attention = tf.placeholder(tf.float32,shape=(None, spec.crop_size, spec.crop_size, 1))
+attention = tf.placeholder(tf.float32,shape=(None, spec.crop_size, spec.crop_size, 1),name='attention_maps')
 
 # Construct the network
-net = models.attResNet50({'data': input_node, 'attention' : attention})
-#net = models.attResNet101({'data': input_node, 'attention' : attention})
-#net = models.attResNet152({'data': input_node, 'attention' : attention})
+if resnet_type == 50:
+    net = models.attResNet50({'data': input_node, 'attention' : attention})
+elif resnet_type == 101:
+    net = models.attResNet101({'data': input_node, 'attention' : attention})
+elif resnet_type == 152:
+    net = models.attResNet152({'data': input_node, 'attention' : attention})
 
 # Create an image producer (loads and processes images in parallel)
 image_producer = dataset.ImageProducer(image_paths=image_paths, data_spec=spec, batch_size=len(image_paths))
@@ -75,5 +82,7 @@ with tf.Session() as sesh:
     coordinator.request_stop()
     coordinator.join(threads, stop_grace_period_secs=2)
 
+sorted_indices = np.argsort(indices)
+prob = prob[sorted_indices,:]
 class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
 

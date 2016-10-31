@@ -4,7 +4,6 @@ class ResNet50(Network):
     def setup(self):
         (self.feed('data')
              .conv(7, 7, 64, 2, 2, relu=False, name='conv1')
-             #.attention(name='attention1')
              .batch_normalization(relu=True, name='bn_conv1')
              .max_pool(3, 3, 2, 2, name='pool1')
              .conv(1, 1, 256, 1, 1, biased=False, relu=False, name='res2a_branch1')
