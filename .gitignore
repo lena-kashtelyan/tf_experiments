@@ -6,3 +6,5 @@ __pycache__/
 *$py.class
 *.npz
 /pretrained_weights
+.idea
+
