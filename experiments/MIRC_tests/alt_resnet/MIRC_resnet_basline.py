@@ -1,45 +1,45 @@
 #!/usr/bin/env python
 import argparse
-import numpy as np
-import tensorflow as tf
-import os.path as osp
 import models
 import dataset
 import sys
-sys.path.append('../../../')
-sys.path.append('../')
-from exp_ops.helper_functions import *
-from ops.utils import print_prob
+import numpy as np
+import tensorflow as tf
+import os.path as osp
 from glob import glob
+sys.path.append('../')
+sys.path.append('../../../')
+from ops.utils import print_prob
+from exp_ops.helper_functions import *
+from exp_ops.resnet_utils import *
 
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
 full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
-model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_50_data.npy'
-#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_101_data.npy'
-#model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_152_data.npy'
-test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
+
 im_ext = '.JPEG'
 im_size = [224,224]
+batch_size = 25
+resnet_type = 152
 
-# Get the data specifications for the GoogleNet model
-spec = models.get_data_spec(model_class=models.ResNet50)
+model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
+test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
+
+#Prepare network
+net, spec = interpret_resnet(resnet_type)
 
 #Images
 _,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
 syn, skeys = get_synkeys()
 gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
-#gt_ids = np.asarray(gt_ids)
 image_paths = sorted(glob(test_im_dir + '/*' + im_ext)) 
-#image_paths = np.asarray(image_paths)
-#image_paths = image_paths[gt_ids!=-1].tolist()
 
 # Create a placeholder for the input image
 input_node = tf.placeholder(tf.float32,
                                 shape=(None, spec.crop_size, spec.crop_size, spec.channels))
 
 # Construct the network
-net = models.ResNet50({'data': input_node})
+net = net({'data': input_node})
 
 # Create an image producer (loads and processes images in parallel)
 image_producer = dataset.ImageProducer(image_paths=image_paths, data_spec=spec, batch_size=len(image_paths))

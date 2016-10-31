@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 import argparse
-import numpy as np
-import tensorflow as tf
-import os.path as osp
 import models
 import dataset
 import sys
-sys.path.append('../../../')
-sys.path.append('../')
-from exp_ops.helper_functions import *
-from ops.utils import print_prob
+import numpy as np
+import tensorflow as tf
+import os.path as osp
 from glob import glob
+sys.path.append('../')
+sys.path.append('../../../')
+from ops.utils import print_prob
+from exp_ops.helper_functions import *
+from exp_ops.resnet_utils import *
 
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
@@ -19,43 +20,30 @@ full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
 im_ext = '.JPEG'
 im_size = [224,224]
 batch_size = 25
-resnet_type = 50
+resnet_type = 101
 
 model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
 attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',\
 '/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
 
-# Get the data specifications for the GoogleNet model
-if resnet_type == 50:
-    spec = models.get_data_spec(model_class=models.ResNet50)
-elif resnet_type == 101:
-    spec = models.get_data_spec(model_class=models.ResNet101)
-elif resnet_type == 152:
-    spec = models.get_data_spec(model_class=models.ResNet152)
+#Prepare network
+net, spec = interpret_resnet(resnet_type)
 
 #Images
 _,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
 syn, skeys = get_synkeys()
 gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
-#gt_ids = np.asarray(gt_ids)
 image_paths = sorted(glob(test_im_dir + '/*' + im_ext)) 
-#image_paths = np.asarray(image_paths)
-#image_paths = image_paths[gt_ids!=-1].tolist()
 attention_batch = get_attention_maps(attention_path,[spec.crop_size,spec.crop_size])
 
-# Create a placeholder for the input image
+# Create a placeholder for the input image and attention
 input_node = tf.placeholder(tf.float32,
                                 shape=(None, spec.crop_size, spec.crop_size, spec.channels))
 attention = tf.placeholder(tf.float32,shape=(None, spec.crop_size, spec.crop_size, 1),name='attention_maps')
 
 # Construct the network
-if resnet_type == 50:
-    net = models.attResNet50({'data': input_node, 'attention' : attention})
-elif resnet_type == 101:
-    net = models.attResNet101({'data': input_node, 'attention' : attention})
-elif resnet_type == 152:
-    net = models.attResNet152({'data': input_node, 'attention' : attention})
+net = net({'data': input_node, 'attention' : attention})
 
 # Create an image producer (loads and processes images in parallel)
 image_producer = dataset.ImageProducer(image_paths=image_paths, data_spec=spec, batch_size=len(image_paths))
