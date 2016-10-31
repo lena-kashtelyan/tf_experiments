@@ -19,8 +19,7 @@ full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
 
 im_ext = '.JPEG'
 im_size = [224,224]
-batch_size = 25
-resnet_type = 101
+resnet_type = 50
 
 model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
