@@ -15,9 +15,9 @@ def import_model(mtype,attention=False):
 def preproc_im(im):
     if np.max(im) <= 1:
         im *= 255.0
-    im[:,:,0] -= 103.939
+    im[:,:,2] -= 103.939
     im[:,:,1] -= 116.779
-    im[:,:,2] -= 123.68
+    im[:,:,0] -= 123.68
     im = im[...,[2,1,0]] #RGB -> BGR
     if len(im.shape) == 4:
         out_4d = True
