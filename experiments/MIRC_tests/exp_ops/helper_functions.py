@@ -6,6 +6,11 @@ from sklearn import svm
 import skimage, skimage.color, skimage.io, skimage.transform
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import sys
+sys.path.append('../')
+sys.path.append('../alt_resnet')
+#import attention_vgg16, baseline_vgg16
+#from alt_resnet import MIRC_resnet_baseline#, MIRC_resnet_attention
 
 def import_model(mtype,attention=False):
     if attention:
@@ -292,3 +297,42 @@ def shuffle_attention(attention_batch,shuffle_or_warp):
                 np.random.randint(-np.round(attention_batch.shape[1]*.25),np.round(attention_batch.shape[1]*.25))))
             attention_batch[idx,:,:,:] = (skimage.transform.warp(np.squeeze(attention_batch[idx,:,:,:]-1),tform)+1)[:,:,None] #HARDCODED FOR THE [1,2] ATTENTION CASE
     return attention_batch
+
+def run_analyses(params): #This stuff is not working yet
+    it_results = []
+    model_types = net_config['models']
+    for m in model_types:
+        for att in net_config['attention']:
+            it_results.append(execute_model(m,att,net_config['pvalues']))
+    return it_results
+
+def execute_model(model_type,attention_path,ptest):
+    if model_type == 'vgg16':
+        if attention_type != 'none':
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                attention_vgg16(attention_path=attention_path,ptest=ptest)
+        else:
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                baseline_vgg16()
+    elif model_type == 'resnet50':
+        if attention_type != 'none':
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_attention(num_layers=50,attention_path=attention_path,ptest=ptest)
+        else:
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_baseline(num_layers=50)
+    elif model_type == 'resnet101':
+        if attention_type != 'none':
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_attention(num_layers=101,attention_path=attention_path,ptest=ptest)
+        else:
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_baseline(num_layers=101)
+    elif model_type == 'resnet152':
+        if attention_type != 'none':
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_attention(num_layers=152,attention_path=attention_path,ptest=ptest)
+        else:
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                MIRC_resnet_baseline(num_layers=152)
+    return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval

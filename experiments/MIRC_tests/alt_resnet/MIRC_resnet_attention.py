@@ -12,6 +12,7 @@ sys.path.append('../../../')
 from ops.utils import print_prob
 from exp_ops.helper_functions import *
 from exp_ops.resnet_utils import *
+from copy import deepcopy
 
 absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
 syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
@@ -19,7 +20,10 @@ full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
 
 im_ext = '.JPEG'
 im_size = [224,224]
-resnet_type = 50
+batch_size = 25
+resnet_type = 101
+ptest = True
+num_perms = 1000
 
 model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
 test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
@@ -64,6 +68,22 @@ with tf.Session() as sesh:
     # Perform a forward pass through the network to get the class probabilities
     print('Classifying')
     prob = sesh.run(net.get_output(), feed_dict={input_node: input_images, attention:attention_batch})
+
+
+    if ptest:
+        _, _, _, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn,print_results=False)
+        for idx in tqdm(range(num_perms)):
+            shuff_att = shuffle_attention(deepcopy(attention_batch),shuffle_or_warp)
+            feed_dict = {images: test_X, attention_maps: shuff_att}
+            prob = sess.run(vgg.prob, feed_dict=feed_dict)
+            _, _, _, t1_perm_accs[idx], t5_perm_accs[idx] = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn,print_results=False)
+            if t1_perm_accs[idx] > max_perm_acc:
+                max_perm_acc = t1_perm_accs[idx]
+                opt_perm_maps = shuff_att
+        t1_p = (np.sum(t1_true_acc < t1_perm_accs) + 1).astype(np.float32) / (num_perms + 1)
+        t5_p = (np.sum(t5_true_acc < t5_perm_accs) + 1).astype(np.float32) / (num_perms + 1)
+
+
 
     # Stop the worker threads
     coordinator.request_stop()

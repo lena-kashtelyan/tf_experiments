@@ -12,61 +12,62 @@ sys.path.append('../../../')
 from ops.utils import print_prob
 from exp_ops.helper_functions import *
 from exp_ops.resnet_utils import *
+from experiments.config import * # Path configurations
 
-absolute_home = '/home/drew/Documents/tensorflow-vgg' #need to figure out a better system
-syn_file = absolute_home + '/data/ilsvrc_2012/synset_names.txt'
-full_syn = absolute_home + '/data/ilsvrc_2012/synset.txt'
+def MIRC_resnet_baseline(num_layers=152):
+    im_ext = '.JPEG'
+    im_size = [224,224]
+    model_data_path = resnet_weight_path + 'resnet_' + str(num_layers) + '_data.npy'
 
-im_ext = '.JPEG'
-im_size = [224,224]
-batch_size = 25
-resnet_type = 50
+    #Prepare network
+    net, spec = interpret_resnet(num_layers)
 
-model_data_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/resnet_' + str(resnet_type) + '_data.npy'
-test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
+    #Images
+    _,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
+    syn, skeys = get_synkeys()
+    gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
+    image_paths = sorted(glob(test_im_dir + '/*' + im_ext)) 
 
-#Prepare network
-net, spec = interpret_resnet(resnet_type)
+    # Create a placeholder for the input image
+    input_node = tf.placeholder(tf.float32,
+                                    shape=(None, spec.crop_size, spec.crop_size, spec.channels))
 
-#Images
-_,_,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=False,apply_preprocess=True)
-syn, skeys = get_synkeys()
-gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
-image_paths = sorted(glob(test_im_dir + '/*' + im_ext)) 
+    # Construct the network
+    net = net({'data': input_node})
 
-# Create a placeholder for the input image
-input_node = tf.placeholder(tf.float32,
-                                shape=(None, spec.crop_size, spec.crop_size, spec.channels))
+    # Create an image producer (loads and processes images in parallel)
+    image_producer = dataset.ImageProducer(image_paths=image_paths, data_spec=spec, batch_size=len(image_paths))
 
-# Construct the network
-net = net({'data': input_node})
+    #Work through all batches
+    with tf.Session() as sesh:
+        # Start the image processing workers
+        coordinator = tf.train.Coordinator()
+        threads = image_producer.start(session=sesh, coordinator=coordinator)
 
-# Create an image producer (loads and processes images in parallel)
-image_producer = dataset.ImageProducer(image_paths=image_paths, data_spec=spec, batch_size=len(image_paths))
+        # Load the converted parameters
+        print('Loading the model')
+        net.load(model_data_path, sesh)
 
-#Work through all batches
-with tf.Session() as sesh:
-    # Start the image processing workers
-    coordinator = tf.train.Coordinator()
-    threads = image_producer.start(session=sesh, coordinator=coordinator)
+        # Load the input image
+        print('Loading the images')
+        indices, input_images = image_producer.get(sesh)
 
-    # Load the converted parameters
-    print('Loading the model')
-    net.load(model_data_path, sesh)
+        # Perform a forward pass through the network to get the class probabilities
+        print('Classifying')
+        prob = sesh.run(net.get_output(), feed_dict={input_node: input_images})
 
-    # Load the input image
-    print('Loading the images')
-    indices, input_images = image_producer.get(sesh)
+        # Stop the worker threads
+        coordinator.request_stop()
+        coordinator.join(threads, stop_grace_period_secs=2)
 
-    # Perform a forward pass through the network to get the class probabilities
-    print('Classifying')
-    prob = sesh.run(net.get_output(), feed_dict={input_node: input_images})
+    sorted_indices = np.argsort(indices)
+    prob = prob[sorted_indices,:]
+    class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
 
-    # Stop the worker threads
-    coordinator.request_stop()
-    coordinator.join(threads, stop_grace_period_secs=2)
+    return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, 1
 
-sorted_indices = np.argsort(indices)
-prob = prob[sorted_indices,:]
-class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
-
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        MIRC_resnet_baseline(num_layers=int(sys.argv[1]))
+    else:
+        MIRC_resnet_baseline()
