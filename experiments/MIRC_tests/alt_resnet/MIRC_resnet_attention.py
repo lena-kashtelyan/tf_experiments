@@ -75,7 +75,7 @@ with tf.Session() as sesh:
         _, _, _, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn,print_results=False)
         for idx in tqdm(range(num_perms)):
             shuff_att = shuffle_attention(deepcopy(attention_batch),shuffle_or_warp)
-            feed_dict = {images: test_X, attention_maps: shuff_att}
+            feed_dict = {input_node: input_images, attention_maps: shuff_att}
             prob = sess.run(vgg.prob, feed_dict=feed_dict)
             _, _, _, t1_perm_accs[idx], t5_perm_accs[idx] = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn,print_results=False)
             if t1_perm_accs[idx] > max_perm_acc:
