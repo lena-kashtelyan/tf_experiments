@@ -23,15 +23,18 @@ if node_name == 'x9':
     #Set up experiment variables
     if image_set == 1:
         test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
-        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'] #Clicks
-        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_vgg/machine_none/heatmaps.npz'] #Clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'] #Human clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_vgg/machine_none/heatmaps.npz'] #Machine clicks
+        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_1_saliency.npz'] #bottom up saliency
+        #--------------------------------------------------
         #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz'] #Labelme
         #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',
         #    '/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz'] #Combined
     elif image_set == 2:
         test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation_replication'
-        attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/uniform_weight_overlap/heatmaps.npz'] #Human clicks
-        # = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_vgg/uniform_weight_overlap/heatmaps.npz'] #Machine clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/uniform_weight_overlap/heatmaps.npz'] #Human clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_vgg/uniform_weight_overlap/heatmaps.npz'] #Machine clicks
+        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_2_saliency.npz'] #bottom up saliency
     else:
         print('Cannot understand what images you want to use. Exiting.')
         sys.exit
