@@ -14,7 +14,7 @@ from exp_ops.helper_functions import *
 from exp_ops.resnet_utils import *
 from experiments.config import * # Path configurations
 
-def MIRC_resnet_baseline(num_layers=152):
+def MIRC_resnet_baseline(num_layers=50):
     im_ext = '.JPEG'
     im_size = [224,224]
     model_data_path = resnet_weight_path + 'resnet_' + str(num_layers) + '_data.npy'
@@ -51,20 +51,20 @@ def MIRC_resnet_baseline(num_layers=152):
         # Load the input image
         print('Loading the images')
         indices, input_images = image_producer.get(sesh)
+        sorted_indices = np.argsort(indices)
 
         # Perform a forward pass through the network to get the class probabilities
         print('Classifying')
         prob = sesh.run(net.get_output(), feed_dict={input_node: input_images})
-
+        prob = prob[sorted_indices,:]
         # Stop the worker threads
         coordinator.request_stop()
         coordinator.join(threads, stop_grace_period_secs=2)
-
-    sorted_indices = np.argsort(indices)
-    prob = prob[sorted_indices,:]
+    
     class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
-
-    return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, 1
+    t1_p = 100
+    t5_p = 100
+    return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_p, t5_p
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

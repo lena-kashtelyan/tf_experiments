@@ -12,17 +12,29 @@ if node_name == 'x9':
     # Home of this source code: Three folders up form the config file
     src_dir = '/home/drew/Documents/tensorflow-vgg'
     sys.path.append(src_dir)
-    test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
-    train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train'
+    image_set = 1 #1 or 2
+    train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train' #Pretty sure this is vestigial
     syn_file = pjoin(src_dir, 'data', 'ilsvrc_2012', 'synset_names.txt')
     full_syn = pjoin(src_dir, 'data', 'ilsvrc_2012', 'synset.txt')
     vgg16_weight_path = pjoin(src_dir, 'pretrained_weights', 'vgg16.npy')
+    vgg19_weight_path = pjoin(src_dir, 'pretrained_weights', 'vgg19.npy')
     resnet_weight_path = '/home/drew/Documents/caffe-tensorflow/resnet_conversions/'
 
-    #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz']
-    attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
-    #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',
-    #    '/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz']
+    #Set up experiment variables
+    if image_set == 1:
+        test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'] #Clicks
+        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_vgg/machine_none/heatmaps.npz'] #Clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz'] #Labelme
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz',
+        #    '/home/drew/Documents/MIRC_behavior/click_comparisons/output/labelme.npz'] #Combined
+    elif image_set == 2:
+        test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation_replication'
+        attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/uniform_weight_overlap/heatmaps.npz'] #Human clicks
+        # = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_vgg/uniform_weight_overlap/heatmaps.npz'] #Machine clicks
+    else:
+        print('Cannot understand what images you want to use. Exiting.')
+        sys.exit
 else:
     # Sven2
     data_dir = '/media/data_gluster/attention'

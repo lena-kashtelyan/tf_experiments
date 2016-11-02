@@ -75,6 +75,7 @@ def process_image(im,im_size,togray=True,apply_preprocess=False): #TODO, remove 
 
 def get_synkeys():
     syn = {};
+    #Image set 1
     syn['border_collie'] = 'n02106166'
     syn['panther'] = 'n02128925'
     syn['bald_eagle'] = 'n01614925'
@@ -85,6 +86,17 @@ def get_synkeys():
     syn['sportscar'] = 'n04285008'#n02106166
     syn['trailer_truck'] = 'n04467665'#n02106166
     syn['speedboat'] = 'n04273569'#n02106166
+    #Image set 2
+    syn['english_foxhound'] = 'n02089973'
+    syn['husky'] = 'n02109961'
+    syn['miniature_poodle'] = 'n02113712'
+    syn['night_snake'] = 'n01740131'
+    syn['polecat'] = 'n02443114'
+    syn['cassette_player'] = 'n02979186'
+    syn['missile'] = 'n04008634'
+    syn['sunglass'] = 'n04355933'
+    syn['screen'] = 'n04152593'
+    syn['water_jug'] = 'n04560804'
     #syn['bike'] = 'n03792782'#n02106166
     #syn['warship'] = 'n02687172'#n02106166
     #syn['bug'] = 'n02190166'#n02106166

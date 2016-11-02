@@ -32,7 +32,6 @@ def baseline_vgg16():
             prob = sess.run(vgg.prob, feed_dict=feed_dict)
 
     class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
-
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, 100, 100
 
 
