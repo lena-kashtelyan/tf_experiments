@@ -112,7 +112,7 @@ def get_heatmap_filename(model_name, method_name, variant_name, class_index, ima
         os.makedirs(path)
     return os.path.join(path, '%s_%s_%s.npy' % (model_name, str(class_index), os.path.basename(image_filename)))
 
-def generate_heatmaps_for_images(image_filenames, model_name, method_name, variant, block_size=10, block_stride=1, generate_plots=False):
+def generate_heatmaps_for_images(image_filenames, model_name, method_name, variant, block_size=10, block_stride=1, generate_plots=False, use_true_label=False):
     # Generate all heatmaps for images in list
     if generate_plots:
         import matplotlib.pyplot as plt
@@ -123,7 +123,10 @@ def generate_heatmaps_for_images(image_filenames, model_name, method_name, varia
     for k, wordnet_id in syn.iteritems():
         name_to_class_index[k] = synset_names.index(wordnet_id)
     # Get class indices for all files
-    class_indices = [get_class_index_for_filename(fn, name_to_class_index) for fn in image_filenames]
+    if use_true_label:
+        class_indices = [get_class_index_for_filename(fn, name_to_class_index) for fn in image_filenames]
+    else:
+        class_indices = [None] * len(image_filenames)
     # Process all files
     variant_name = '%s_%d_%d' % (variant, block_size, block_stride)
     with init_session() as sess:
@@ -149,7 +152,7 @@ def generate_heatmaps_for_images(image_filenames, model_name, method_name, varia
 
 def test_heatmap():
     import matplotlib.pyplot as plt
-    image_filename = "../../forward_pass/test_data/tiger.jpeg"
+    image_filename = "/media/data_gluster/attention/MIRC_images_for_sven/bw_validation/all_images/panther8.JPEG"
     variant = 'neg'
     class_index = None
     heatmap_fn = get_heatmap_filename('vgg16', 'bubbles', variant, class_index, image_filename)
@@ -165,12 +168,13 @@ def test_heatmap():
 
 
     f, axarr = plt.subplots(2, 1)
-    axarr[0].imshow(img)
+    axarr[0].imshow(img, cmap='gray')
     m = axarr[1].matshow(heatmap)
     f.colorbar(m)
     plt.show()
 
 if __name__ == "__main__":
+    #test_heatmap()
     image_filenames = glob.glob(os.path.join(data_dir, 'MIRC_images_for_sven', 'bw_validation', 'all_images', '*.JPEG'))
-    image_filenames = [fn for fn in image_filenames if not os.path.basename(fn).startswith('mircs')]
-    generate_heatmaps_for_images(image_filenames, 'vgg16', 'bubbles', 'neg', block_size=10, block_stride=1, generate_plots=True)
+    #image_filenames = [fn for fn in image_filenames if not os.path.basename(fn).startswith('mircs')] # Exclude MIRCs
+    generate_heatmaps_for_images(image_filenames, 'vgg16', 'bubbles', 'neg', block_size=10, block_stride=1, generate_plots=True, use_true_label=False)
