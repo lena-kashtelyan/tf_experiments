@@ -27,6 +27,7 @@ class Vgg16:
         :param rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
         """
 
+        self.input = rgb
         start_time = time.time()
         print("build model started")
         rgb_scaled = rgb * 255.0 #Assuming images scaled [0,1]!!!!!

@@ -38,6 +38,8 @@ if node_name == 'x9':
     else:
         print('Cannot understand what images you want to use. Exiting.')
         sys.exit
+        print('Oops! Didn''t actually exit. Let''s try again.')
+        sys.exit()
 else:
     # Sven2
     data_dir = '/media/data_gluster/attention'
@@ -49,3 +51,5 @@ else:
     attention_path = [
         pjoin(data_dir, 'MIRC_behavior', 'heat_map_output', 'pooled_p2p_alt', 'uniform_weight_overlap_human', 'heatmaps.npz'),
         pjoin(data_dir, 'MIRC_behavior', 'click_comparisons', 'output', 'labelme.npz')]
+    pretrained_weights_path = pjoin(data_dir, 'pretrained_weights')
+    heatmap_path = pjoin(data_dir, 'heatmaps')
