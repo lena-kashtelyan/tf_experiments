@@ -6,7 +6,7 @@ import numpy as np
 os.environ['CUDA_VISIBLE_DEVICES'] = '0' # Run only on GPU 0 to speed up init time
 import tensorflow as tf
 import glob
-from scipy.misc import imresize
+from scipy.misc import imresize, imsave
 
 from tf_experiments.experiments.config import pretrained_weights_path, heatmap_path, data_dir
 from tf_experiments.model_depo import vgg16
@@ -47,14 +47,14 @@ def get_bubbles_heatmap(sess, model, input_image, class_index=None, block_size=1
     batch = np.zeros(input_shape)
     feed_dict = {model.input: batch}
 
+    # Get baseline prob
+    batch[0, ...] = input_image
+    prob = sess.run(model.prob, feed_dict=feed_dict)[0].squeeze()
     # Get class index
     if class_index is None:
-        batch[0, ...] = input_image
-        prob = sess.run(model.prob, feed_dict=feed_dict)[0].squeeze()
         class_index = np.argmax(prob)
-        print '  Using class index %d (prob %.3f)' % (class_index, prob[class_index])
-    else:
-        print '  Using class index %d (true label)' % (class_index)
+    base_prob = prob[class_index]
+    print '  Using class index %d (prob %.3f)' % (class_index, base_prob)
 
     # Prepare output (zoomed down for block_stride>1)
     output_size = [c / block_stride for c in input_shape[1:3]]
@@ -64,7 +64,7 @@ def get_bubbles_heatmap(sess, model, input_image, class_index=None, block_size=1
     def process_batch(n=batch_size):
         prob = sess.run(model.prob, feed_dict=feed_dict).squeeze()
         for i, c in enumerate(coords[:n]):
-            heatmap[c[0], c[1]] = prob[i, class_index]
+            heatmap[c[0], c[1]] = prob[i, class_index] - base_prob
 
     # Accumulate image regions into batch and process them
     i_batch = 0
@@ -79,12 +79,11 @@ def get_bubbles_heatmap(sess, model, input_image, class_index=None, block_size=1
             x0 = max(0, x - block_size / 2)
             x1 = min(input_shape[2], x + (block_size + 1) / 2)
             if variant == 'pos':
-                image_masked = np.zeros(input_shape[1:])
-                image_masked[y0:y1, x0:x1, :] = input_image[y0:y1, x0:x1, :]
+                batch[i_batch, ...] = 0
+                batch[i_batch, y0:y1, x0:x1, :] = input_image[y0:y1, x0:x1, :]
             else:
-                image_masked = input_image.copy()
-                image_masked[y0:y1, x0:x1, :] = 0
-            batch[i_batch, ...] = image_masked
+                batch[i_batch, ...] = input_image
+                batch[i_batch, y0:y1, x0:x1, :] = 0
             coords[i_batch] = [iy, ix]
             i_batch += 1
             if i_batch == batch_size:
@@ -95,14 +94,14 @@ def get_bubbles_heatmap(sess, model, input_image, class_index=None, block_size=1
     # Process remainder
     if i_batch:
         process_batch(i_batch)
-    print '  Heatmap done.',
+    print '  Heatmap done.'
 
     # Undo zoom
     heatmap = zoom(heatmap, block_stride)
 
     # Reverse signal of blanked-out
     if variant == 'neg':
-        heatmap = 1.0 - heatmap
+        heatmap = -heatmap
 
     return heatmap
 
@@ -113,8 +112,10 @@ def get_heatmap_filename(model_name, method_name, variant_name, class_index, ima
         os.makedirs(path)
     return os.path.join(path, '%s_%s_%s.npy' % (model_name, str(class_index), os.path.basename(image_filename)))
 
-def generate_heatmaps_for_images(image_filenames, model_name, method_name, variant, block_size=10, block_stride=1):
+def generate_heatmaps_for_images(image_filenames, model_name, method_name, variant, block_size=10, block_stride=1, generate_plots=False):
     # Generate all heatmaps for images in list
+    if generate_plots:
+        import matplotlib.pyplot as plt
     # Load synkeys to class index
     syn, _skeys = get_synkeys()
     synset_names = open(os.path.join(data_dir, 'data', 'ilsvrc_2012', 'synset_names.txt'), 'rt').read().splitlines()
@@ -137,6 +138,13 @@ def generate_heatmaps_for_images(image_filenames, model_name, method_name, varia
                 heatmap = get_bubbles_heatmap(sess, vgg, img, class_index, variant=variant, block_size=block_size, block_stride=block_stride)
                 print ' Saving heatmap to %s...' % heatmap_filename
                 np.save(heatmap_filename, heatmap)
+                if generate_plots:
+                    f, axarr = plt.subplots(2, 1)
+                    axarr[0].imshow(img, cmap='gray')
+                    m = axarr[1].matshow(heatmap)
+                    f.colorbar(m)
+                    plt.savefig(heatmap_filename + '.png')
+                    plt.close()
 
 
 def test_heatmap():
@@ -155,6 +163,7 @@ def test_heatmap():
             heatmap = get_bubbles_heatmap(sess, vgg, img, class_index, variant=variant)
             np.save(heatmap_fn, heatmap)
 
+
     f, axarr = plt.subplots(2, 1)
     axarr[0].imshow(img)
     m = axarr[1].matshow(heatmap)
@@ -164,4 +173,4 @@ def test_heatmap():
 if __name__ == "__main__":
     image_filenames = glob.glob(os.path.join(data_dir, 'MIRC_images_for_sven', 'bw_validation', 'all_images', '*.JPEG'))
     image_filenames = [fn for fn in image_filenames if not os.path.basename(fn).startswith('mircs')]
-    generate_heatmaps_for_images(image_filenames, 'vgg16', 'bubbles', 'neg', block_size=10, block_stride=1)
+    generate_heatmaps_for_images(image_filenames, 'vgg16', 'bubbles', 'neg', block_size=10, block_stride=1, generate_plots=True)
