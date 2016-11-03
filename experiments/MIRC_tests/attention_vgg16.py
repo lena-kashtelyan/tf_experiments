@@ -4,8 +4,8 @@ sys.path.append('/home/drew/Documents/tensorflow-vgg/')
 import tensorflow as tf
 from copy import deepcopy
 from exp_ops.helper_functions import *
-from experiments.config import * # Path configurations
-from model_depo import att_vgg16 as vgg16
+from tf_experiments.experiments.config import * # Path configurations
+from tf_experiments.model_depo import att_vgg16 as vgg16
 
 def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
 

@@ -7,6 +7,8 @@ import skimage, skimage.color, skimage.io, skimage.transform
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import sys
+import os
+from tf_experiments.experiments.config import data_dir
 sys.path.append('../')
 sys.path.append('../alt_resnet')
 #import attention_vgg16, baseline_vgg16
@@ -105,6 +107,26 @@ def get_synkeys():
     #syn['eye'] = '-1'
     skeys = syn.keys()
     return syn, skeys
+
+def get_class_index_for_filename(image_filename, name_to_class_index):
+    # Resolve a path like foo/bar/bald_eagle123.JPEG to the class index for ILSVRC2012
+    # Load synkeys to class index (cached)
+    if not hasattr(get_class_index_for_filename, 'name_to_class_index'):
+        syn, _skeys = get_synkeys()
+        synset_names = open(os.path.join(data_dir, 'data', 'ilsvrc_2012', 'synset_names.txt'), 'rt').read().splitlines()
+        name_to_class_index = {}
+        for k, wordnet_id in syn.iteritems():
+            name_to_class_index[k] = synset_names.index(wordnet_id)
+        get_class_index_for_filename.name_to_class_index = name_to_class_index
+    else:
+        name_to_class_index = get_class_index_for_filename.name_to_class_index
+    # Find beginning of given filename in synset class list
+    image_filename = os.path.basename(image_filename)
+    try:
+        class_name = re.search('[a-zA-Z_]*', image_filename).group(0)
+        return name_to_class_index[class_name]
+    except:
+        raise RuntimeError('Could not determine class name from filename %s' % image_filename)
 
 def zscore_attention(maps):
     mus = np.mean(np.mean(maps,axis=0),axis=0)
