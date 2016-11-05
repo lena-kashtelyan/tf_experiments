@@ -116,6 +116,7 @@ def scale_attention(maps):
 
 def extract_attention_from_npz(attention_path):
     att_dict = np.load(attention_path)
+    import ipdb;ipdb.set_trace()
     att_maps = att_dict['image_maps']
     att_labels = att_dict['im_files']
     return check_mean_att(att_maps),att_labels
@@ -125,22 +126,25 @@ def check_mean_att(att_maps):
         att_maps = np.nanmean(att_maps,axis=3)
     return att_maps
 
-def get_attention_maps(attention_path,im_size):
+def get_attention_maps(attention_path,im_size,im_names):
     att_data = [extract_attention_from_npz(x) for x in attention_path]
-    att_labels = att_data[0][1]
+    if len(att_data) > 0:
+        att_labels = att_data[0][1]
 
-    if len(attention_path) == 1:
-        att_maps = att_data[0][0]
-    else:
-        att_maps = np.squeeze(np.sum(np.asarray([x[0]for x in att_data]),axis=0))
-        
-    for a in range(att_maps.shape[2]):
-        res_map = misc.imresize(att_maps[:,:,a],im_size)[None,:,:]
-        if a == 0:
-            out_a = res_map
+        if len(attention_path) == 1:
+            att_maps = att_data[0][0]
         else:
-            out_a = np.concatenate((out_a,res_map),axis=0)
-
+            att_maps = np.squeeze(np.sum(np.asarray([x[0]for x in att_data]),axis=0))
+        
+        for a in range(att_maps.shape[2]):
+            res_map = misc.imresize(att_maps[:,:,a],im_size)[None,:,:]
+            if a == 0:
+                out_a = res_map
+            else:
+                out_a = np.concatenate((out_a,res_map),axis=0)
+    else:
+        print('No maps found in attention_path! Using uniform attention.')
+        out_a = np.zeros((len(im_names), im_size[0], im_size[1]))
     #Normalize each map
     #out_a = scale_attention(out_a.astype(np.float32))
     #out_a = scale_attention(out_a.astype(np.float32)) + 0.5
@@ -326,6 +330,13 @@ def execute_model(model_type,attention_path,ptest):
         else:
             class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
                 baseline_vgg16()
+    if model_type == 'vgg19':
+        if attention_type != 'none':
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                attention_vgg19(attention_path=attention_path,ptest=ptest)
+        else:
+            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
+                baseline_vgg19()
     elif model_type == 'resnet50':
         if attention_type != 'none':
             class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \

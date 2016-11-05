@@ -29,7 +29,7 @@ def MIRC_resnet_attention(num_layers=50,ptest=False,num_perms=1000,shuffle_or_wa
     syn, skeys = get_synkeys()
     gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
     image_paths = sorted(glob(test_im_dir + '/*' + im_ext)) 
-    attention_batch = get_attention_maps(attention_path,[spec.crop_size,spec.crop_size])
+    attention_batch = get_attention_maps(attention_path,[spec.crop_size,spec.crop_size],test_names)
 
     # Create a placeholder for the input image and attention
     input_node = tf.placeholder(tf.float32,

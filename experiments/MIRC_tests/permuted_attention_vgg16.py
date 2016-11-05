@@ -29,7 +29,7 @@ syn, skeys = get_synkeys()
 #Prepare training data and train an svm
 test_X,test_y,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=grayscale)
 gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
-attention_batch = get_attention_maps(attention_path,im_size)
+attention_batch = get_attention_maps(attention_path,im_size,test_names)
 
 t1_perm_accs = np.zeros((num_perms))
 t5_perm_accs = np.zeros((num_perms))

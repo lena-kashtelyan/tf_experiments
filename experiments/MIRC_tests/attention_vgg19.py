@@ -20,7 +20,7 @@ def attention_vgg19(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
     #Prepare training data and train an svm
     test_X,test_y,test_names = prepare_testing_images(test_im_dir,im_size,im_ext,grayscale=grayscale)
     gt,gt_ids = get_labels(test_names,syn,skeys,syn_file)
-    attention_batch = get_attention_maps(attention_path,im_size)
+    attention_batch = get_attention_maps(attention_path,im_size,test_names)
     with tf.device('/gpu:0'):
         with tf.Session(
                 config=tf.ConfigProto(allow_soft_placement = True, gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=.8)))) as sess:
