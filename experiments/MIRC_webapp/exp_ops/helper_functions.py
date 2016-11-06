@@ -163,7 +163,6 @@ def get_attention_maps(attention_path,im_size,im_names):
     else:
         print('No maps found in attention_path! Using uniform attention.')
         out_a = np.zeros((len(im_names), im_size[0], im_size[1]))
-        import ipdb;ipdb.set_trace()
     #Normalize each map
     out_a = out_a + 1
     return out_a[:,:,:,None]# > 0).astype(np.float32)
