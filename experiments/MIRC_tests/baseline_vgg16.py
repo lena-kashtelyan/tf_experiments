@@ -1,9 +1,8 @@
 import os, sys
-sys.path.append('/home/drew/Documents/tensorflow-vgg/')
-
+sys.path.append('../../../')
 import tensorflow as tf
 from exp_ops.helper_functions import *
-from experiments.config import * # Path configurations
+from tf_experiments.experiments.config import * # Path configurations
 from model_depo import vgg16
 
 def baseline_vgg16():

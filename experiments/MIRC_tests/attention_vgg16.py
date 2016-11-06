@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys
-sys.path.append('/home/drew/Documents/tensorflow-vgg/')
+sys.path.append('../../../')
 import tensorflow as tf
 from copy import deepcopy
 from exp_ops.helper_functions import *

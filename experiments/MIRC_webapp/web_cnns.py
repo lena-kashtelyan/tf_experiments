@@ -82,7 +82,6 @@ def attention_vgg16(test_im_dir,syn_file,full_syn,model_weight_path,attention_pa
             attention_maps = tf.placeholder("float", [bs,attention_batch.shape[1],attention_batch.shape[2],attention_batch.shape[3]])
             with tf.name_scope("content_vgg"):
                 vgg.build(images,attention_maps,attention_conv)
-            import ipdb;ipdb.set_trace()
             class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = run_batches(gt,gt_ids,test_names,im_ext,full_syn,bs,sess,images,vgg,test_X,attention_maps,attention_batch)
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds
 

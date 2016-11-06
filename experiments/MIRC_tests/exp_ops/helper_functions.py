@@ -8,9 +8,12 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 import sys
 import os
-from tf_experiments.experiments.config import data_dir
-sys.path.append('../')
+sys.path.append('../../../../')
 sys.path.append('../alt_resnet')
+try:
+    from tf_experiments.experiments.config import data_dir
+except:
+    pass
 #import attention_vgg16, baseline_vgg16
 #from alt_resnet import MIRC_resnet_baseline#, MIRC_resnet_attention
 
@@ -138,7 +141,6 @@ def scale_attention(maps):
 
 def extract_attention_from_npz(attention_path):
     att_dict = np.load(attention_path)
-    import ipdb;ipdb.set_trace()
     att_maps = att_dict['image_maps']
     att_labels = att_dict['im_files']
     return check_mean_att(att_maps),att_labels

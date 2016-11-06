@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import os, sys
-sys.path.append('/home/drew/Documents/tensorflow-vgg/')
+sys.path.append('../../../')
 import tensorflow as tf
 from copy import deepcopy
 from exp_ops.helper_functions import *
-from experiments.config import * # Path configurations
+from tf_experiments.experiments.config import * # Path configurations
 from model_depo import att_vgg19 as vgg19
 
 def attention_vgg19(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
