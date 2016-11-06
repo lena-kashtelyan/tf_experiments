@@ -138,7 +138,6 @@ def scale_attention(maps):
 
 def extract_attention_from_npz(attention_path):
     att_dict = np.load(attention_path)
-    import ipdb;ipdb.set_trace()
     att_maps = att_dict['image_maps']
     att_labels = att_dict['im_files']
     return check_mean_att(att_maps),att_labels
@@ -149,32 +148,24 @@ def check_mean_att(att_maps):
     return att_maps
 
 def get_attention_maps(attention_path,im_size,im_names):
-    import ipdb;ipdb.set_trace()
-    att_data = [extract_attention_from_npz(x) for x in attention_path]
-    if len(att_data) > 0:
-        att_labels = att_data[0][1]
-
-        if len(attention_path) == 1:
-            att_maps = att_data[0][0]
-        else:
-            att_maps = np.squeeze(np.sum(np.asarray([x[0]for x in att_data]),axis=0))
-        
-        for a in range(att_maps.shape[2]):
-            res_map = misc.imresize(att_maps[:,:,a],im_size)[None,:,:]
+    #load from jpegs isntead of npys
+    if len(attention_path) > 0:
+        for a in range(attention_path[0]):
+            im = misc.imread(a)
+            if len(im.shape) > 2:
+                im = rgb2gray(im)
+            res_map = misc.imresize(im,im_size)[None,:,:]
             if a == 0:
                 out_a = res_map
             else:
                 out_a = np.concatenate((out_a,res_map),axis=0)
+        out_a = scale_attention(out_a.astype(np.float32))
     else:
         print('No maps found in attention_path! Using uniform attention.')
         out_a = np.zeros((len(im_names), im_size[0], im_size[1]))
+        import ipdb;ipdb.set_trace()
     #Normalize each map
-    #out_a = scale_attention(out_a.astype(np.float32))
-    #out_a = scale_attention(out_a.astype(np.float32)) + 0.5
-    out_a = scale_attention(out_a.astype(np.float32)) + 1
-    #out_a = scale_attention(out_a.astype(np.float32)) + 1e50
-    #out_a = zscore_attention(out_a.astype(np.float32))
-    #out_a = np.ones((out_a.shape)) + 1 #+100 ##+ 1e10
+    out_a = out_a + 1
     return out_a[:,:,:,None]# > 0).astype(np.float32)
 
 def prepare_training_images(train_im_dir, im_size, im_ext, grayscale=False, keep_number = 500):
@@ -274,7 +265,6 @@ def evaluate_model(gt_syn,gt_ids,prob,train_names,im_ext,file_path,print_results
         t1,t5 = print_prob(idx, file_path)
         t1_preds.append(t1)
         t5_preds.append(t5)
-    import ipdb;ipdb.set_trace()
     cat_guesses = get_argmax(prob).transpose()[0]
     class_accuracy = get_class_accuracy(cat_guesses,gt_ids,file_path)
     #print(zip(t1_preds,proc_names))
@@ -331,48 +321,3 @@ def shuffle_attention(attention_batch,shuffle_or_warp):
             attention_batch[idx,:,:,:] = (skimage.transform.warp(np.squeeze(attention_batch[idx,:,:,:]-1),tform)+1)[:,:,None] #HARDCODED FOR THE [1,2] ATTENTION CASE
     return attention_batch
 
-def run_analyses(params): #This stuff is not working yet
-    it_results = []
-    model_types = net_config['models']
-    for m in model_types:
-        for att in net_config['attention']:
-            it_results.append(execute_model(m,att,net_config['pvalues']))
-    return it_results
-
-def execute_model(model_type,attention_path,ptest):
-    if model_type == 'vgg16':
-        if attention_type != 'none':
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                attention_vgg16(attention_path=attention_path,ptest=ptest)
-        else:
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                baseline_vgg16()
-    if model_type == 'vgg19':
-        if attention_type != 'none':
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                attention_vgg19(attention_path=attention_path,ptest=ptest)
-        else:
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                baseline_vgg19()
-    elif model_type == 'resnet50':
-        if attention_type != 'none':
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_attention(num_layers=50,attention_path=attention_path,ptest=ptest)
-        else:
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_baseline(num_layers=50)
-    elif model_type == 'resnet101':
-        if attention_type != 'none':
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_attention(num_layers=101,attention_path=attention_path,ptest=ptest)
-        else:
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_baseline(num_layers=101)
-    elif model_type == 'resnet152':
-        if attention_type != 'none':
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_attention(num_layers=152,attention_path=attention_path,ptest=ptest)
-        else:
-            class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval = \
-                MIRC_resnet_baseline(num_layers=152)
-    return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_pval, t5_pval

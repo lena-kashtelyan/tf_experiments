@@ -24,8 +24,8 @@ def run_batches(gt,gt_ids,test_names,im_ext,full_syn,bs,sess,images,vgg,test_X,a
     uni_batches = np.arange(test_X.shape[0]//bs)
     cv_ind = np.repeat(uni_batches,bs,axis=0)
     class_accuracy = []
-    t1_preds = np.zeros((len(cv_ind)))
-    t5_preds = np.zeros((len(cv_ind)))
+    t1_true_acc = np.zeros((len(cv_ind)))
+    t5_true_acc = np.zeros((len(cv_ind)))
     t1_preds = []
     t5_preds = []
     test_names = np.asarray(test_names)
@@ -71,7 +71,7 @@ def baseline_vgg19(test_im_dir,syn_file,full_syn,model_weight_path):
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds
 
 def attention_vgg16(test_im_dir,syn_file,full_syn,model_weight_path,attention_path):
-    bs, im_ext, im_size, grayscale, _, syn, skeys, test_X, test_y, test_names, gt, gt_ids = \
+    bs, im_ext, im_size, grayscale, attention_conv, syn, skeys, test_X, test_y, test_names, gt, gt_ids = \
         global_settings(test_im_dir,syn_file)
     attention_batch = get_attention_maps(attention_path,im_size,test_names)
     with tf.device('/gpu:0'):
@@ -82,11 +82,12 @@ def attention_vgg16(test_im_dir,syn_file,full_syn,model_weight_path,attention_pa
             attention_maps = tf.placeholder("float", [bs,attention_batch.shape[1],attention_batch.shape[2],attention_batch.shape[3]])
             with tf.name_scope("content_vgg"):
                 vgg.build(images,attention_maps,attention_conv)
+            import ipdb;ipdb.set_trace()
             class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = run_batches(gt,gt_ids,test_names,im_ext,full_syn,bs,sess,images,vgg,test_X,attention_maps,attention_batch)
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds
 
 def attention_vgg19(test_im_dir,syn_file,full_syn,model_weight_path,attention_path):
-    bs, im_ext, im_size, grayscale, _, syn, skeys, test_X, test_y, test_names, gt, gt_ids = \
+    bs, im_ext, im_size, grayscale, attention_conv, syn, skeys, test_X, test_y, test_names, gt, gt_ids = \
         global_settings(test_im_dir,syn_file)
     attention_batch = get_attention_maps(attention_path,im_size,test_names)
     with tf.device('/gpu:0'):
