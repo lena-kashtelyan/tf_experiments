@@ -53,7 +53,7 @@ def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle',insert_
 
         class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
         if insert_into_database:
-            add_to_mirc_database(class_accuracy, t1_preds, t5_preds,experiment=image_set,model_name=sys.argv[0],attention=attention_path)
+            add_to_mirc_database(class_accuracy,experiment=image_set,model_name=sys.argv[0],attention=attention_path)
 
     if ptest:
         print('top-1 p value:',t1_p)

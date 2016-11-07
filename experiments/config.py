@@ -12,7 +12,7 @@ if node_name == 'x9':
     # Home of this source code: Three folders up form the config file
     src_dir = '/home/drew/Documents/tf_experiments/'
     sys.path.append(src_dir)
-    image_set = 1 #1 or 2
+    image_set = 2 #1 or 2
     train_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/train' #Pretty sure this is vestigial
     syn_file = pjoin(src_dir, 'data', 'ilsvrc_2012', 'synset_names.txt')
     full_syn = pjoin(src_dir, 'data', 'ilsvrc_2012', 'synset.txt')

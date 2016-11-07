@@ -18,7 +18,7 @@ except:
 #import attention_vgg16, baseline_vgg16
 #from alt_resnet import MIRC_resnet_baseline#, MIRC_resnet_attention
 
-def add_to_mirc_database(class_accuracy, t1_preds, t5_preds,experiment=None,model_name=None,attention=None):
+def add_to_mirc_database(class_accuracy, experiment=None,model_name=None,attention=None):
     #Connect to database
     connection_string = db_credentials.python_postgresql()
     conn = psycopg2.connect(connection_string)
@@ -26,9 +26,9 @@ def add_to_mirc_database(class_accuracy, t1_preds, t5_preds,experiment=None,mode
 
     for name,acc in class_accuracy:
         if attention:
-            cur.execute("INSERT INTO cnn_results (model_name,category,attention,experiment) VALUES (%s,%s,%s,%s)",(model_name,name,attention,acc))
+            cur.execute("INSERT INTO cnn_results (model_name,category,attention,experiment,t1) VALUES (%s,%s,%s,%s,%s)",(model_name,name,attention,experiment,acc))
         else:
-            cur.execute("INSERT INTO cnn_results (model_name,category,experiment) VALUES (%s,%s,%s)",(model_name,name,acc))
+            cur.execute("INSERT INTO cnn_results (model_name,category,experiment,t1) VALUES (%s,%s,%s,%s)",(model_name,name,experiment,acc))
 
     #Finalize and close connections
     conn.commit()

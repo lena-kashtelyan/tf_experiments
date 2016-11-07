@@ -5,7 +5,7 @@ from exp_ops.helper_functions import *
 from tf_experiments.experiments.config import * # Path configurations
 from model_depo import vgg19
 
-def baseline_vgg19():
+def baseline_vgg19(insert_into_database=True):
     im_ext = '.JPEG'
     im_size = [224,224]
     grayscale=False
@@ -31,6 +31,8 @@ def baseline_vgg19():
             prob = sess.run(vgg.prob, feed_dict=feed_dict)
 
     class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
+    if insert_into_database:
+        add_to_mirc_database(class_accuracy,experiment=image_set,model_name=sys.argv[0])
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, 100, 100
 
 
