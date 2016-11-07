@@ -6,8 +6,9 @@ from sklearn import svm
 import skimage, skimage.color, skimage.io, skimage.transform
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-import sys
-import os
+import db_credentials
+import sys,os
+import psycopg2
 sys.path.append('../../../../')
 sys.path.append('../alt_resnet')
 try:
@@ -16,6 +17,23 @@ except:
     pass
 #import attention_vgg16, baseline_vgg16
 #from alt_resnet import MIRC_resnet_baseline#, MIRC_resnet_attention
+
+def add_to_mirc_database(class_accuracy, t1_preds, t5_preds,experiment=None,model_name=None,attention=None):
+    #Connect to database
+    connection_string = db_credentials.python_postgresql()
+    conn = psycopg2.connect(connection_string)
+    cur = conn.cursor()
+
+    for name,acc in class_accuracy:
+        if attention:
+            cur.execute("INSERT INTO cnn_results (model_name,category,attention,experiment) VALUES (%s,%s,%s,%s)",(model_name,name,attention,acc))
+        else:
+            cur.execute("INSERT INTO cnn_results (model_name,category,experiment) VALUES (%s,%s,%s)",(model_name,name,acc))
+
+    #Finalize and close connections
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def import_model(mtype,attention=False):
     if attention:
@@ -172,7 +190,7 @@ def get_attention_maps(attention_path,im_size,im_names):
     #Normalize each map
     #out_a = scale_attention(out_a.astype(np.float32))
     #out_a = scale_attention(out_a.astype(np.float32)) + 0.5
-    out_a = scale_attention(out_a.astype(np.float32)) + 1
+    out_a = scale_attention(out_a.astype(np.float32)) + 2
     #out_a = scale_attention(out_a.astype(np.float32)) + 1e50
     #out_a = zscore_attention(out_a.astype(np.float32))
     #out_a = np.ones((out_a.shape)) + 1 #+100 ##+ 1e10

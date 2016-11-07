@@ -62,7 +62,6 @@ def MIRC_resnet_attention(num_layers=50,ptest=False,num_perms=1000,shuffle_or_wa
         print('Classifying')
         feed_dict = {input_node: input_images, attention:attention_batch}
         prob = sesh.run(net.get_output(), feed_dict=feed_dict)
-        import ipdb;ipdb.set_trace()
 
         if ptest:
             t1_perm_accs = np.zeros((num_perms))

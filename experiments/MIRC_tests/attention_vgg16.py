@@ -7,7 +7,7 @@ from exp_ops.helper_functions import *
 from tf_experiments.experiments.config import * # Path configurations
 from tf_experiments.model_depo import att_vgg16 as vgg16
 
-def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
+def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle',insert_into_database=True):
 
     im_ext = '.JPEG'
     im_size = [224,224]
@@ -52,6 +52,9 @@ def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
                 t5_p = (np.sum(t5_true_acc < t5_perm_accs) + 1).astype(np.float32) / (num_perms + 1)
 
         class_accuracy, t1_preds, t5_preds, t1_true_acc, t5_true_acc = evaluate_model(gt,gt_ids,prob,test_names,im_ext,full_syn)
+        if insert_into_database:
+            add_to_mirc_database(class_accuracy, t1_preds, t5_preds,experiment=image_set,model_name=sys.argv[0],attention=attention_path)
+
     if ptest:
         print('top-1 p value:',t1_p)
         print('top-5 p value:',t5_p)
@@ -60,6 +63,7 @@ def attention_vgg16(ptest=False,num_perms=1000,shuffle_or_warp='shuffle'):
         t5_p = 100
     #im_mosaic(np.squeeze(l1[0,:,:,:]))
     #im_mosaic(np.squeeze(l2[0,:,:,:]))
+
     return class_accuracy, t1_true_acc, t5_true_acc, t1_preds, t5_preds, t1_p, t5_p
 
 if __name__ == '__main__':
