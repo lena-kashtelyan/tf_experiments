@@ -190,7 +190,7 @@ def get_attention_maps(attention_path,im_size,im_names):
     #Normalize each map
     #out_a = scale_attention(out_a.astype(np.float32))
     #out_a = scale_attention(out_a.astype(np.float32)) + 0.5
-    out_a = scale_attention(out_a.astype(np.float32)) + 2
+    out_a = scale_attention(out_a.astype(np.float32)) + 1
     #out_a = scale_attention(out_a.astype(np.float32)) + 1e50
     #out_a = zscore_attention(out_a.astype(np.float32))
     #out_a = np.ones((out_a.shape)) + 1 #+100 ##+ 1e10

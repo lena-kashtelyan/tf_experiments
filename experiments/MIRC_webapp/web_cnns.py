@@ -22,7 +22,10 @@ def global_settings(test_im_dir,syn_file):
 
 def run_batches(gt,gt_ids,test_names,im_ext,full_syn,bs,sess,images,vgg,test_X,attention_maps=None,attention_batch=None):
     uni_batches = np.arange(test_X.shape[0]//bs)
-    cv_ind = np.repeat(uni_batches,bs,axis=0)
+    cv_ind = np.repeat(uni_batches,bs)
+    if len(cv_ind) < test_X.shape[0]:
+        cv_ind = np.vstack((cv_ind,np.repeat(-1,test_X.shape[0] - len(cv_ind))))
+
     class_accuracy = []
     t1_true_acc = np.zeros((len(cv_ind)))
     t5_true_acc = np.zeros((len(cv_ind)))
