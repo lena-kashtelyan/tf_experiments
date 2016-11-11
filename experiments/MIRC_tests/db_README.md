@@ -6,5 +6,5 @@
 	e. alter role cvpr superuser; #ensure we are sudo
 	f. create database cvpr_mirc_experiment with owner cvpr; #create the webapp's database
 	g. \q #quit
-	h. psql cvpr -h 127.0.0.1 -d cnn_results #log into the database with the admin credentials
+	h. psql cvpr -h 127.0.0.1 -d cvpr_mirc_experiment #log into the database with the admin credentials
 	i. create table cnn_results (_id bigserial primary key, model_name varchar, experiment varchar, attention varchar, category varchar, t1 float, t5 float);

@@ -149,13 +149,16 @@ def get_class_index_for_filename(image_filename, name_to_class_index):
     except:
         raise RuntimeError('Could not determine class name from filename %s' % image_filename)
 
-def zscore_attention(maps):
-    mus = np.mean(np.mean(maps,axis=0),axis=0)
-    sds = np.std(np.std(maps,axis=0),axis=0)
-    return 3 + ((maps - mus) / sds) #rectify/ortranslate to 0.. doesn't work quite yet. probably not a good idea anyway.
-
+def zscore_atte
 def scale_attention(maps):
-    return maps/np.max(np.max(maps,axis=0),axis=0)[None,None,:]
+    mn = np.min(np.min(maps,axis=0),axis=0)
+    ma = np.max(np.max(maps,axis=0),axis=0)
+    return (maps - mn) / (ma - mn)[None,None,:]
+
+def zs_attention(maps):
+    mu = np.mean(np.mean(maps,axis=0),axis=0)
+    sd = np.std(np.std(maps,axis=0),axis=0)
+    return (maps - mu) / (sd)[None,None,:]
 
 def extract_attention_from_npz(attention_path):
     att_dict = np.load(attention_path)
@@ -176,26 +179,22 @@ def get_attention_maps(attention_path,im_size,im_names):
         if len(attention_path) == 1:
             att_maps = att_data[0][0]
         else:
-            att_maps = np.squeeze(np.sum(np.asarray([x[0]for x in att_data]),axis=0))
-        
+            att_maps = np.squeeze(np.mean(np.asarray([zs_attention(x[0]) for x in att_data]),axis=0))
+
         for a in range(att_maps.shape[2]):
             res_map = misc.imresize(att_maps[:,:,a],im_size)[None,:,:]
             if a == 0:
                 out_a = res_map
             else:
                 out_a = np.concatenate((out_a,res_map),axis=0)
+
     else:
         print('No maps found in attention_path! Using uniform attention.')
         out_a = np.zeros((len(im_names), im_size[0], im_size[1]))
     #Normalize each map
-    #out_a = scale_attention(out_a.astype(np.float32))
-    #out_a = scale_attention(out_a.astype(np.float32)) + 0.5
     out_a = scale_attention(out_a.astype(np.float32)) + 1
-    #out_a = scale_attention(out_a.astype(np.float32)) + 1e50
-    #out_a = zscore_attention(out_a.astype(np.float32))
-    #out_a = np.ones((out_a.shape)) + 1 #+100 ##+ 1e10
-    return out_a[:,:,:,None]# > 0).astype(np.float32)
-
+    return out_a[:,:,:,None]
+    
 def prepare_training_images(train_im_dir, im_size, im_ext, grayscale=False, keep_number = 500):
     #train_im_dir is a directory of directories
     cat_folders = glob(train_im_dir + '/*')

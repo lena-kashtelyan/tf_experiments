@@ -7,7 +7,7 @@ node_name = os.uname()[1]
 
 
 # Path settings
-image_set = 3 #1 or 2 or 3
+image_set = 2 #1 or 2 or 3
 if node_name == 'x9':
     # Drew
     # Home of this source code: Three folders up form the config file
@@ -23,10 +23,12 @@ if node_name == 'x9':
     if image_set == 1:
         test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation'
         #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/uniform_weight_overlap_human/heatmaps.npz'] #Human clicks
-        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/human_none/heatmaps.npz'] #Human clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/human_none/heatmaps.npz'] #Human clicks
         #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_vgg/uniform_weight_overlap_machine/heatmaps.npz'] #Machine clicks
         #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_1_saliency.npz'] #bottom up saliency
-        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_1_saliency.npz'] #deepgaze ii maps
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/deep_gaze_ii_images_1/maps.npz'] #deepgaze ii maps
+        attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/pooled_p2p_alt/human_none/heatmaps.npz',
+        '/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/deep_gaze_ii_images_1/maps.npz'] #deepgaze ii maps
         #--------------------------------------------------
         #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/vgg_bubbles_images_1/maps.npz'] #Human clicks
         #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/vgg_maps_images_1/maps.npz'] #Human clicks
@@ -37,10 +39,12 @@ if node_name == 'x9':
     elif image_set == 2:
         test_im_dir = '/home/drew/Downloads/p2p_MIRCs/imgs/all_validation_replication'
         #attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/uniform_weight_overlap/heatmaps.npz'] #Human clicks
-        attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/human_none/heatmaps.npz'] #Human clicks
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/human_none/heatmaps.npz'] #Human clicks
         #attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_vgg/uniform_weight_overlap/heatmaps.npz'] #Machine clicks
         #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_2_saliency.npz'] #bottom up saliency
-        #attention_path = ['/home/drew/Documents/MIRC_behavior/heat_map_output/bu_saliency/images_2_saliency.npz'] #deepgaze ii maps
+        #attention_path = ['/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/deep_gaze_ii_images_2/maps.npz'] #deepgaze ii maps
+        attention_path = ['/home/drew/Documents/MIRC_behavior/replication_heat_map_output/pooled_p2p/human_none/heatmaps.npz',
+        '/home/drew/Documents/MIRC_behavior/click_comparisons/heatmaps_for_paper/deep_gaze_ii_images_2/maps.npz'] #deepgaze ii maps
         #--------------------------------------------------        
     elif image_set == 3: #combined for svm
         test_im_dir = ['/home/drew/Downloads/p2p_MIRCs/imgs/all_validation','/home/drew/Downloads/p2p_MIRCs/imgs/all_validation_replication']

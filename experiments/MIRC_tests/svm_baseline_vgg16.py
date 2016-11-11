@@ -52,7 +52,7 @@ def svm_baseline_vgg16():
             #prob = sess.run(vgg.prob, feed_dict=feed_dict)
             for idx in range(num_batches):
                 feed_dict = {images: test_X[bi==idx,:,:,:]}
-                fc_batches.append(sess.run(vgg.fc8, feed_dict=feed_dict))
+                fc_batches.append(sess.run(vgg.fc7, feed_dict=feed_dict))
 
     fc_batches = np.vstack((fc_batches[:]))
     np.savez('svm_data/baseline_svm_data_vgg16',fc_batches=fc_batches,gt=gt,gt_ids=gt_ids,test_names=test_names,full_syn=full_syn)
